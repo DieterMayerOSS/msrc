@@ -696,8 +696,8 @@ static void set_config(sensor_ibus_t **sensor, uint16_t sensormask) {
         parameter.protocol = config->gps_protocol;
         parameter.baudrate = config->gps_baudrate;
         parameter.rate = config->gps_rate;
-        parameter.lat = malloc(sizeof(double));
-        parameter.lon = malloc(sizeof(double));
+        parameter.lat = malloc(sizeof(float));
+        parameter.lon = malloc(sizeof(float));
         parameter.alt = malloc(sizeof(float));
         parameter.spd = malloc(sizeof(float));
         parameter.cog = malloc(sizeof(float));
