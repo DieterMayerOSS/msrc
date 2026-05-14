@@ -189,13 +189,12 @@ jobs:
 
       - name: Write release body
         run: |
-          cat > release_body.md << EOF
+          cat > release_body.md << 'EOF'
           Development (auto)
 
           MSRC Link:
-          - commit: "${{ github.event.head_commit.message }}"
-          - commit-url: "https://github.com/${{ github.repository }}/commit/${{ github.sha }}"
-
+          - commit: ${{ github.sha }}
+          - commit-url: https://github.com/${{ github.repository }}/commit/${{ github.sha }}
           EOF
 
       - name: Publish MSRC Link to Development release
