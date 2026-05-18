@@ -19,8 +19,11 @@
 #define INA3221_MANUFACTURER (0xFE)
 #define INA3221_DIE_ID (0xFF)
 
-#define MODE_VOLTAGE_CONTINUOUS 0x110        // Bus continuous
-#define VOLTAGE_CONVERSION_TIME (0x11 << 6)  // 588us
+#define CH1_ENABLE (1u << 14)
+#define CH2_ENABLE (1u << 13)
+#define CH3_ENABLE (1u << 12)
+#define MODE_VOLTAGE_CONTINUOUS 0x06         // Bus continuous
+#define VOLTAGE_CONVERSION_TIME (0x03 << 6)  // 588us
 //#define AVG 0x7     // 128 samples
 //#define CH 0x7      // Enable all channels
 #define RST 0x8000  // Reset bit
@@ -75,11 +78,10 @@ static void begin(ina3221_parameters_t *parameter) {
     // would be silently truncated by a single-byte store.
     if (parameter->cell_count > 3) parameter->cell_count = 3;
     if (parameter->cell_count < 1) parameter->cell_count = 1;
-    uint16_t config = MODE_VOLTAGE_CONTINUOUS | VOLTAGE_CONVERSION_TIME |
-                      ((uint16_t)parameter->filter << 9);
-    for (uint8_t i = 1; i < parameter->cell_count; i++) {
-        config |= (uint16_t)(1u << (i + 12));
-    }
+    uint16_t config = MODE_VOLTAGE_CONTINUOUS | VOLTAGE_CONVERSION_TIME | ((uint16_t)(parameter->filter & 0x07) << 9);
+    if (parameter->cell_count > 0) config |= CH1_ENABLE;
+    if (parameter->cell_count > 1) config |= CH2_ENABLE;
+    if (parameter->cell_count > 2) config |= CH3_ENABLE;
     data[0] = INA3221_CONFIGURATION;
     data[1] = (uint8_t)(config >> 8);    // MSB: CH enables, AVG, conversion time MSBs
     data[2] = (uint8_t)(config & 0xFF);  // LSB: conversion time LSBs, mode
