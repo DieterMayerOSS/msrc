@@ -189,7 +189,9 @@ typedef struct config_t {                            // smartport data_id
     uint8_t sensor_id_srxl2;
     int8_t ntc_offset;                               // 0x5153
     uint8_t spare7;
-    uint32_t spare8;
+    uint8_t sensor_id_jeti;
+    uint8_t spare81;
+    uint16_t spare82;
     uint32_t spare9;
     uint32_t spare10;
     uint32_t spare11;

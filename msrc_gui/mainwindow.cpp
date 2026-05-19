@@ -602,6 +602,8 @@ void MainWindow::setUiFromConfig() {
     else
         ui->cbSpeedUnitsGps->setCurrentIndex(1);
 
+     ui->sbSensorIdJeti->setValue(config.sensor_id_jeti);
+
     // FPort
 
     ui->cbFPortInverted->setChecked(config.fport_inverted);
@@ -822,6 +824,8 @@ void MainWindow::getConfigFromUi() {
     else
         config.jeti_gps_speed_units_kmh = false;
 
+    config.sensor_id_jeti = ui->sbSensorIdJeti->value();
+
     // Ibus
 
     config.ibus_alternative_coordinates = ui->cbAlternativeCoordinates->isChecked();
@@ -1025,9 +1029,13 @@ void MainWindow::on_cbReceiver_currentTextChanged(const QString &arg1) {
     if (arg1 == "Jeti Ex Bus" || arg1 == "Jeti Ex Sensor") {
         ui->cbSpeedUnitsGps->setVisible(true);
         ui->lbSpeedUnitsGps->setVisible(true);
+        ui->lbSensorIdJeti->setVisible(true);
+        ui->sbSensorIdJeti->setVisible(true);
     } else {
         ui->cbSpeedUnitsGps->setVisible(false);
         ui->lbSpeedUnitsGps->setVisible(false);
+        ui->lbSensorIdJeti->setVisible(false);
+        ui->sbSensorIdJeti->setVisible(false);
     }
 
     if (arg1 == "Futaba SBUS2") {

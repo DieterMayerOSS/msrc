@@ -33,12 +33,11 @@
 #include "voltage.h"
 #include "xgzp68xxd.h"
 
-#define JETIEX_WAIT 0
-#define JETIEX_SEND 1
-
 #define JETIEX_PACKET_LENGHT 8
 #define JETIEX_TIMEOUT_US 500
 #define JETIEX_BAUDRATE_TIMEOUT_MS 5000
+
+static uint8_t sensor_id = 0;
 
 static void process(uint *baudrate, sensor_jetiex_t **sensor);
 static void send_packet(uint8_t packet_id, sensor_jetiex_t **sensor);
@@ -91,7 +90,7 @@ uint8_t jeti_create_telemetry_buffer(uint8_t *buffer, bool packet_type, sensor_j
     buffer[1] |= buffer_index - 1;
     buffer[2] = JETIEX_MFG_ID_LOW;
     buffer[3] = JETIEX_MFG_ID_HIGH;
-    buffer[4] = JETIEX_DEV_ID_LOW;
+    buffer[4] = JETIEX_DEV_ID_LOW + sensor_id;
     buffer[5] = JETIEX_DEV_ID_HIGH;
     buffer[6] = 0x00;
     buffer[buffer_index] = crc8(buffer + 1, buffer_index - 1);
@@ -112,6 +111,8 @@ void jeti_set_config(sensor_jetiex_t **sensor) {
     TaskHandle_t task_handle;
     sensor_jetiex_t *new_sensor;
     float *baro_temp = NULL, *baro_pressure = NULL;
+    sensor_id = config->sensor_id_jeti;
+    if (sensor_id > 4) sensor_id = 4;
 
     if (config->esc_protocol == ESC_PWM) {
         esc_pwm_parameters_t parameter = {config->rpm_multiplier, config->alpha_rpm, malloc(sizeof(float))};
@@ -1021,17 +1022,19 @@ static void add_sensor_value(uint8_t *buffer, uint8_t *buffer_index, uint8_t sen
 
 static void add_sensor_text(uint8_t *buffer, uint8_t *buffer_index, uint8_t sensor_index, sensor_jetiex_t *sensor) {
     uint8_t lenText, lenUnit;
+    char main_sensor_text[16];
+    snprintf(main_sensor_text, sizeof(main_sensor_text), "MSRC %u", sensor_id);
     if (sensor) {
         lenText = strlen(sensor->text);
         lenUnit = strlen(sensor->unit);
     } else {
-        lenText = strlen("MSRC");
-        lenUnit = strlen("");
+        lenText = strlen(main_sensor_text);
+        lenUnit = 0;
     }
     *(buffer + *buffer_index) = sensor_index;
     *(buffer + *buffer_index + 1) = lenText << 3 | lenUnit;
     *buffer_index += 2;
-    strcpy((char *)buffer + *buffer_index, sensor ? sensor->text : "MSRC");
+    strcpy((char *)buffer + *buffer_index, sensor ? sensor->text : main_sensor_text);
     *buffer_index += lenText;
     strcpy((char *)buffer + *buffer_index, sensor ? sensor->unit : "");
     *buffer_index += lenUnit;
